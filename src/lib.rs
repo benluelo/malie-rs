@@ -3,8 +3,118 @@ use std::num::NonZeroU8;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-fn main() {
-    println!("Hello, world!");
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+#[serde(tag = "card_type")]
+enum Card {
+    #[serde(rename = "POKEMON")]
+    Pokemon(Pokemon),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Pokemon {
+    name: String,
+    lang: Lang,
+    foil: Option<Foil>,
+    size: CardSize,
+    artists: Artists,
+    regulation_mark: RegulationMark,
+    set_icon: String,
+    collector_number: CollectorNumber,
+
+    // NOTE: These fields may be combined in the future
+    rarity: String,
+    rarity_icon: String,
+
+    copyright: Copyright,
+    tags: Option<Vec<String>>,
+    stage: String,
+    stage_text: Option<String>,
+    hp: u16,
+    weakness: Weakness,
+    resistance: Option<Resistance>,
+    retreat: Option<NonZeroU8>,
+    flavor_text: Option<String>,
+    text: Vec<Text>,
+    _tcgl: Tcgl,
+    images: Images,
+    sort_number: i64,
+    types: Vec<EnergyType>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub enum Lang {
+    #[serde(rename = "en-US")]
+    EnUs,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Foil {
+    #[serde(rename = "type")]
+    ty: FoilType,
+    mask: FoilMask,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub enum FoilType {
+    FlatSilver,
+    SunPillar,
+    SvHolo,
+    SvUltra,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub enum FoilMask {
+    Reverse,
+    Holo,
+    Etched,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub enum CardSize {
+    #[serde(rename = "STANDARD")]
+    Standard,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Artists {
+    text: String,
+    list: Vec<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub enum RegulationMark {
+    A,
+    B,
+    C,
+    D,
+    E,
+    F,
+    G,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct CollectorNumber {
+    denominator: String,
+    full: String,
+    numerator: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Copyright {
+    text: String,
+    // REVIEW: Enum?
+    year: u16,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -17,13 +127,7 @@ struct Tcgl {
     oa_reldate: String,
     reldate: String,
 }
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-struct Struct3 {
-    denominator: String,
-    full: String,
-    numerator: String,
-}
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Struct6 {
@@ -136,82 +240,6 @@ struct Resistance {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Pokemon {
-    name: String,
-    lang: String,
-    foil_type: Option<FoilType>,
-    foil_mask: Option<FoilMask>,
-    size: CardSize,
-    artist_text: String,
-    artists: Vec<String>,
-    regulation_mark: RegulationMark,
-    set_icon: String,
-    collector_number: Struct3,
-    rarity: String,
-    rarity_icon: String,
-    copyright: String,
-    copyright_year: u16,
-    tags: Option<Vec<String>>,
-    stage: String,
-    stage_text: Option<String>,
-    hp: u16,
-    weakness: Weakness,
-    resistance: Option<Resistance>,
-    retreat: Option<NonZeroU8>,
-    flavor_text: Option<String>,
-    text: Vec<Text>,
-    _tcgl: Tcgl,
-    images: Images,
-    sort_number: i64,
-    types: Vec<EnergyType>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub enum RegulationMark {
-    A,
-    B,
-    C,
-    D,
-    E,
-    F,
-    G,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub enum FoilMask {
-    Reverse,
-    Holo,
-    Etched,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub enum CardSize {
-    #[serde(rename = "STANDARD")]
-    Standard,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub enum FoilType {
-    FlatSilver,
-    SunPillar,
-    SvHolo,
-    SvUltra,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-#[serde(tag = "card_type")]
-enum Card {
-    #[serde(rename = "POKEMON")]
-    Pokemon(Pokemon),
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
 enum EnergyType {
     Grass,
     Fire,
@@ -238,7 +266,7 @@ fn serde() {
             continue;
         }
 
-        let card: Card = serde_json::from_value(value).unwrap();
+        let card: Card = serde_json::from_str(&serde_json::to_string(&value).unwrap()).unwrap();
 
         dbg!(card);
     }
