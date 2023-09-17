@@ -42,7 +42,7 @@ struct Pokemon {
     text: Vec<Text>,
     _tcgl: Tcgl,
     images: Images,
-    sort_number: i64,
+    sort_number: NonZeroU16,
     types: Vec<EnergyType>,
 }
 
