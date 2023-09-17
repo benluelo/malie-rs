@@ -2,6 +2,7 @@ use std::num::{NonZeroU16, NonZeroU8};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use url::Url;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -199,23 +200,23 @@ struct TcglImages {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ImageJpg {
-    front: String,
+    front: Url,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ImagePng {
-    front: String,
-    foil: Option<String>,
-    etch: Option<String>,
+    front: Url,
+    foil: Option<Url>,
+    etch: Option<Url>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ImageTex {
-    front: String,
-    foil: Option<String>,
-    etch: Option<String>,
+    front: Url,
+    foil: Option<Url>,
+    etch: Option<Url>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
