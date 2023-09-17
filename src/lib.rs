@@ -1,4 +1,4 @@
-use std::num::NonZeroU8;
+use std::num::{NonZeroU16, NonZeroU8};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -29,9 +29,9 @@ struct Pokemon {
 
     copyright: Copyright,
     tags: Option<Vec<CardTag>>,
-    stage: String,
+    stage: Stage,
     stage_text: Option<String>,
-    hp: u16,
+    hp: NonZeroU16,
     weakness: Weakness,
     resistance: Option<Resistance>,
     retreat: Option<NonZeroU8>,
@@ -128,20 +128,80 @@ pub enum CardTag {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
+pub enum Stage {
+    Basic,
+    #[serde(rename = "Stage 1")]
+    Stage1,
+    #[serde(rename = "Stage 2")]
+    Stage2,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Weakness {
+    amount: u8,
+    operator: WeaknessOperator,
+    types: Vec<EnergyType>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub enum WeaknessOperator {
+    #[serde(rename = "+")]
+    Add,
+    #[serde(rename = "×")]
+    Multiply,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Resistance {
+    amount: u8,
+    operator: ResistanceOperator,
+    types: Vec<EnergyType>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub enum ResistanceOperator {
+    #[serde(rename = "-")]
+    Subtract,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 struct Tcgl {
-    archetypeID: String,
-    cardID: String,
+    #[serde(rename = "archetypeID")]
+    archetype_id: String,
+    #[serde(rename = "cardID")]
+    card_id: String,
     key: String,
-    longFormID: String,
+    #[serde(rename = "longFormID")]
+    long_form_id: String,
     oa_reldate: String,
     reldate: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Struct6 {
+struct Images {
+    tcgl: TcglImages,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct TcglImages {
+    jpg: ImageJpg,
+    png: ImagePng,
+    tex: ImageTex,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ImageJpg {
     front: String,
 }
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ImagePng {
@@ -149,6 +209,7 @@ struct ImagePng {
     foil: Option<String>,
     etch: Option<String>,
 }
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ImageTex {
@@ -156,18 +217,7 @@ struct ImageTex {
     foil: Option<String>,
     etch: Option<String>,
 }
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-struct ImagesInner {
-    jpg: Struct6,
-    png: ImagePng,
-    tex: ImageTex,
-}
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-struct Images {
-    tcgl: ImagesInner,
-}
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Damage {
@@ -229,22 +279,6 @@ struct RuleBox {
 struct Effect {
     name: String,
     text: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-struct Weakness {
-    amount: i64,
-    operator: String,
-    types: Vec<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-struct Resistance {
-    amount: i64,
-    operator: String,
-    types: Vec<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
