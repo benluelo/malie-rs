@@ -28,7 +28,7 @@ struct Pokemon {
     rarity_icon: String,
 
     copyright: Copyright,
-    tags: Option<Vec<String>>,
+    tags: Option<Vec<CardTag>>,
     stage: String,
     stage_text: Option<String>,
     hp: u16,
@@ -115,6 +115,15 @@ pub struct Copyright {
     text: String,
     // REVIEW: Enum?
     year: u16,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub enum CardTag {
+    #[serde(rename = "EX_LOWER")]
+    ExLower,
+    #[serde(rename = "TERA")]
+    Tera,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
