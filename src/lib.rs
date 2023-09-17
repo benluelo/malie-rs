@@ -1,7 +1,9 @@
-use std::num::{NonZeroU16, NonZeroU8};
+use std::{
+    fmt::Debug,
+    num::{NonZeroU16, NonZeroU8},
+};
 
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use url::Url;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -172,8 +174,8 @@ pub enum ResistanceOperator {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Tcgl {
-    #[serde(rename = "archetypeID")]
-    archetype_id: String,
+    #[serde(rename = "archetypeID", with = "crate::u32_hex")]
+    archetype_id: u32,
     #[serde(rename = "cardID")]
     card_id: String,
     key: String,
@@ -297,8 +299,58 @@ enum EnergyType {
     Colorless,
 }
 
+pub mod u32_hex {
+    use serde::{de, Deserialize};
+
+    const HEX_ENCODING_PREFIX: &str = "0x";
+
+    pub fn serialize<S>(data: &u32, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.collect_str(&format_args!(
+            "{HEX_ENCODING_PREFIX}{encoding}",
+            encoding = hex::encode(data.to_be_bytes())
+        ))
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<u32, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        <&str>::deserialize(deserializer).and_then(|s| {
+            s.strip_prefix(HEX_ENCODING_PREFIX)
+                .ok_or(de::Error::invalid_value(
+                    de::Unexpected::Str(s),
+                    &"hex encoded u32 bytes, 0x-prefixed",
+                ))
+                .and_then(|maybe_hex| {
+                    hex::decode(maybe_hex)
+                        .map_err(|_| {
+                            de::Error::invalid_value(
+                                de::Unexpected::Str(maybe_hex),
+                                &"hex encoded u32 bytes, 0x-prefixed",
+                            )
+                        })
+                        .and_then(|hex| {
+                            hex.try_into()
+                                .map_err(|_| {
+                                    de::Error::invalid_value(
+                                        de::Unexpected::Str(maybe_hex),
+                                        &"hex encoded u32 bytes, 0x-prefixed",
+                                    )
+                                })
+                                .map(u32::from_be_bytes)
+                        })
+                })
+        })
+    }
+}
+
 #[test]
 fn serde() {
+    use serde_json::Value;
+
     let json = std::fs::read_to_string("sv1.en-US.json").unwrap();
 
     let cards = serde_json::from_str::<Vec<Value>>(&json).unwrap();
