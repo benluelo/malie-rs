@@ -6,19 +6,24 @@ use std::{
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 #[serde(tag = "card_type")]
 enum Card {
     #[serde(rename = "POKEMON")]
     Pokemon(Pokemon),
+    #[serde(rename = "TRAINER")]
+    Trainer(Trainer),
+    #[serde(rename = "ENERGY")]
+    Energy(Energy),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Pokemon {
     name: String,
     lang: Lang,
+    #[serde(skip_serializing_if = "Option::is_none")]
     foil: Option<Foil>,
     size: CardSize,
     artists: Artists,
@@ -31,13 +36,18 @@ struct Pokemon {
     rarity_icon: String,
 
     copyright: Copyright,
+    #[serde(skip_serializing_if = "Option::is_none")]
     tags: Option<Vec<CardTag>>,
     stage: Stage,
+    #[serde(skip_serializing_if = "Option::is_none")]
     stage_text: Option<String>,
     hp: NonZeroU16,
     weakness: Weakness,
+    #[serde(skip_serializing_if = "Option::is_none")]
     resistance: Option<Resistance>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     retreat: Option<NonZeroU8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     flavor_text: Option<String>,
     text: Vec<Text>,
     _tcgl: Tcgl,
@@ -46,14 +56,191 @@ struct Pokemon {
     types: Vec<EnergyType>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+#[serde(tag = "subtype")]
+pub enum Trainer {
+    #[serde(rename = "ITEM")]
+    Item(Item),
+    #[serde(rename = "SUPPORTER")]
+    Supporter(Supporter),
+    #[serde(rename = "TOOL")]
+    Tool(Tool),
+    #[serde(rename = "STADIUM")]
+    Stadium(Stadium),
+}
+
+// #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+// pub enum TrainerSubtype {
+//     #[serde(rename = "ITEM")]
+//     Item,
+//     #[serde(rename = "SUPPORTER")]
+//     Supporter,
+//     #[serde(rename = "TOOL")]
+//     Tool,
+//     #[serde(rename = "STADIUM")]
+//     Stadium,
+// }
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Item {
+    // pub struct Trainer {
+    // subtype: TrainerSubtype,
+    name: String,
+    lang: Lang,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    foil: Option<Foil>,
+    size: CardSize,
+    artists: Artists,
+    regulation_mark: RegulationMark,
+    set_icon: String,
+    collector_number: CollectorNumber,
+
+    // NOTE: These fields may be combined in the future
+    rarity: String,
+    rarity_icon: String,
+
+    copyright: Copyright,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    tags: Option<Vec<CardTag>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    flavor_text: Option<String>,
+    text: Vec<Text>,
+    _tcgl: Tcgl,
+    images: Images,
+    sort_number: NonZeroU16,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Supporter {
+    name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    subtitle: Option<String>,
+    lang: Lang,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    foil: Option<Foil>,
+    size: CardSize,
+    artists: Artists,
+    regulation_mark: RegulationMark,
+    set_icon: String,
+    collector_number: CollectorNumber,
+
+    // NOTE: These fields may be combined in the future
+    rarity: String,
+    rarity_icon: String,
+
+    copyright: Copyright,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    tags: Option<Vec<CardTag>>,
+    text: Vec<Text>,
+    _tcgl: Tcgl,
+    images: Images,
+    sort_number: NonZeroU16,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Tool {
+    name: String,
+    lang: Lang,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    foil: Option<Foil>,
+    size: CardSize,
+    artists: Artists,
+    regulation_mark: RegulationMark,
+    set_icon: String,
+    collector_number: CollectorNumber,
+
+    // NOTE: These fields may be combined in the future
+    rarity: String,
+    rarity_icon: String,
+
+    copyright: Copyright,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    tags: Option<Vec<CardTag>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    flavor_text: Option<String>,
+    text: Vec<Text>,
+    _tcgl: Tcgl,
+    images: Images,
+    sort_number: NonZeroU16,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Stadium {
+    name: String,
+    lang: Lang,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    foil: Option<Foil>,
+    size: CardSize,
+    artists: Artists,
+    regulation_mark: RegulationMark,
+    set_icon: String,
+    collector_number: CollectorNumber,
+
+    // NOTE: These fields may be combined in the future
+    rarity: String,
+    rarity_icon: String,
+
+    copyright: Copyright,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    tags: Option<Vec<CardTag>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    flavor_text: Option<String>,
+    text: Vec<Text>,
+    _tcgl: Tcgl,
+    images: Images,
+    sort_number: NonZeroU16,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(tag = "subtype")]
+pub enum Energy {
+    #[serde(rename = "BASIC")]
+    BasicEnergy(BasicEnergy),
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct BasicEnergy {
+    name: String,
+    lang: Lang,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    foil: Option<Foil>,
+    size: CardSize,
+    // REVIEW: Do basic energies every have artist(s)?
+    // artists: Artists,
+    // REVIEW: Do basic energies every have a regulation mark?
+    // regulation_mark: RegulationMark,
+    set_icon: String,
+    collector_number: CollectorNumber,
+
+    // NOTE: These fields may be combined in the future
+    rarity: String,
+    rarity_icon: String,
+
+    copyright: Copyright,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    tags: Option<Vec<CardTag>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    flavor_text: Option<String>,
+    _tcgl: Tcgl,
+    images: Images,
+    sort_number: NonZeroU16,
+    // types: Vec<EnergyType>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub enum Lang {
     #[serde(rename = "en-US")]
     EnUs,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Foil {
     #[serde(rename = "type")]
@@ -61,7 +248,7 @@ pub struct Foil {
     mask: FoilMask,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub enum FoilType {
     FlatSilver,
@@ -70,7 +257,7 @@ pub enum FoilType {
     SvUltra,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub enum FoilMask {
     Reverse,
@@ -78,21 +265,21 @@ pub enum FoilMask {
     Etched,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub enum CardSize {
     #[serde(rename = "STANDARD")]
     Standard,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Artists {
     text: String,
     list: Vec<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub enum RegulationMark {
     A,
@@ -104,7 +291,7 @@ pub enum RegulationMark {
     G,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct CollectorNumber {
     denominator: String,
@@ -112,7 +299,7 @@ struct CollectorNumber {
     numerator: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Copyright {
     text: String,
@@ -120,16 +307,20 @@ pub struct Copyright {
     year: u16,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub enum CardTag {
     #[serde(rename = "EX_LOWER")]
     ExLower,
     #[serde(rename = "TERA")]
     Tera,
+    #[serde(rename = "ITEM")]
+    Item,
+    #[serde(rename = "TOOL")]
+    Tool,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub enum Stage {
     Basic,
@@ -139,7 +330,7 @@ pub enum Stage {
     Stage2,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Weakness {
     amount: u8,
@@ -147,7 +338,7 @@ struct Weakness {
     types: Vec<EnergyType>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub enum WeaknessOperator {
     #[serde(rename = "+")]
@@ -156,7 +347,7 @@ pub enum WeaknessOperator {
     Multiply,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Resistance {
     amount: u8,
@@ -164,14 +355,14 @@ struct Resistance {
     types: Vec<EnergyType>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub enum ResistanceOperator {
     #[serde(rename = "-")]
     Subtract,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Tcgl {
     #[serde(rename = "archetypeID", with = "crate::u32_hex")]
@@ -185,13 +376,13 @@ struct Tcgl {
     reldate: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Images {
     tcgl: TcglImages,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct TcglImages {
     jpg: ImageJpg,
@@ -199,37 +390,42 @@ struct TcglImages {
     tex: ImageTex,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ImageJpg {
     front: Url,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ImagePng {
     front: Url,
+    #[serde(skip_serializing_if = "Option::is_none")]
     foil: Option<Url>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     etch: Option<Url>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ImageTex {
     front: Url,
+    #[serde(skip_serializing_if = "Option::is_none")]
     foil: Option<Url>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     etch: Option<Url>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Damage {
     // REVIEW: Multiple of 10, nonzero?
     amount: u16,
+    #[serde(skip_serializing_if = "Option::is_none")]
     suffix: Option<DamageSuffix>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub enum DamageSuffix {
     #[serde(rename = "+")]
@@ -240,7 +436,7 @@ pub enum DamageSuffix {
     Multiply,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 #[serde(tag = "kind")]
 enum Text {
@@ -252,39 +448,57 @@ enum Text {
     RuleBox(RuleBox),
     #[serde(rename = "EFFECT")]
     Effect(Effect),
+    #[serde(rename = "TEXT_BOX")]
+    TextBox(TextBox),
+    #[serde(rename = "REMINDER")]
+    Reminder(Reminder),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Attack {
     name: String,
     text: String,
     cost: Vec<EnergyType>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     damage: Option<Damage>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Ability {
     name: String,
     text: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct RuleBox {
     name: String,
     text: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Effect {
     name: String,
     text: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct TextBox {
+    name: Option<String>,
+    text: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Reminder {
+    text: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 enum EnergyType {
     Grass,
@@ -353,17 +567,26 @@ fn serde() {
 
     let json = std::fs::read_to_string("sv1.en-US.json").unwrap();
 
-    let cards = serde_json::from_str::<Vec<Value>>(&json).unwrap();
+    let cards = serde_json::from_str::<Vec<Card>>(&json).unwrap();
 
-    for value in cards {
-        dbg!(&value["name"]);
+    let cards_roundtrip_through_parsed =
+        serde_json::from_str::<Vec<Card>>(&serde_json::to_string_pretty(&cards).unwrap()).unwrap();
 
-        if value["card_type"] != "POKEMON" {
-            continue;
-        }
+    // println!("{serialized}");
 
-        let card: Card = serde_json::from_str(&serde_json::to_string(&value).unwrap()).unwrap();
+    assert_eq!(cards, cards_roundtrip_through_parsed);
 
-        dbg!(card);
-    }
+    // dbg!(&cards);
+
+    // for value in cards {
+    //     dbg!(&value["name"]);
+
+    //     // if value["card_type"] != "POKEMON" {
+    //     //     continue;
+    //     // }
+
+    //     let card: Card = serde_json::from_str(&serde_json::to_string(&value).unwrap()).unwrap();
+
+    //     dbg!(card);
+    // }
 }
