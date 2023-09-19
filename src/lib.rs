@@ -1,9 +1,13 @@
 use std::{
     fmt::Debug,
     num::{NonZeroU16, NonZeroU8},
+    str::FromStr,
 };
 
-use serde::{Deserialize, Serialize};
+use serde::{
+    de::{self, Visitor},
+    Deserialize, Serialize,
+};
 use url::Url;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -26,7 +30,8 @@ struct Pokemon {
     #[serde(skip_serializing_if = "Option::is_none")]
     foil: Option<Foil>,
     size: CardSize,
-    artists: Artists,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    artists: Option<Artists>,
     regulation_mark: RegulationMark,
     set_icon: String,
     collector_number: CollectorNumber,
@@ -35,14 +40,16 @@ struct Pokemon {
     rarity: String,
     rarity_icon: String,
 
-    copyright: Copyright,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    copyright: Option<Copyright>,
     #[serde(skip_serializing_if = "Option::is_none")]
     tags: Option<Vec<CardTag>>,
     stage: Stage,
     #[serde(skip_serializing_if = "Option::is_none")]
     stage_text: Option<String>,
     hp: NonZeroU16,
-    weakness: Weakness,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    weakness: Option<Weakness>,
     #[serde(skip_serializing_if = "Option::is_none")]
     resistance: Option<Resistance>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -92,7 +99,8 @@ pub struct Item {
     #[serde(skip_serializing_if = "Option::is_none")]
     foil: Option<Foil>,
     size: CardSize,
-    artists: Artists,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    artists: Option<Artists>,
     regulation_mark: RegulationMark,
     set_icon: String,
     collector_number: CollectorNumber,
@@ -101,7 +109,8 @@ pub struct Item {
     rarity: String,
     rarity_icon: String,
 
-    copyright: Copyright,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    copyright: Option<Copyright>,
     #[serde(skip_serializing_if = "Option::is_none")]
     tags: Option<Vec<CardTag>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -122,7 +131,8 @@ pub struct Supporter {
     #[serde(skip_serializing_if = "Option::is_none")]
     foil: Option<Foil>,
     size: CardSize,
-    artists: Artists,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    artists: Option<Artists>,
     regulation_mark: RegulationMark,
     set_icon: String,
     collector_number: CollectorNumber,
@@ -131,7 +141,8 @@ pub struct Supporter {
     rarity: String,
     rarity_icon: String,
 
-    copyright: Copyright,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    copyright: Option<Copyright>,
     #[serde(skip_serializing_if = "Option::is_none")]
     tags: Option<Vec<CardTag>>,
     text: Vec<Text>,
@@ -148,7 +159,8 @@ pub struct Tool {
     #[serde(skip_serializing_if = "Option::is_none")]
     foil: Option<Foil>,
     size: CardSize,
-    artists: Artists,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    artists: Option<Artists>,
     regulation_mark: RegulationMark,
     set_icon: String,
     collector_number: CollectorNumber,
@@ -157,7 +169,8 @@ pub struct Tool {
     rarity: String,
     rarity_icon: String,
 
-    copyright: Copyright,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    copyright: Option<Copyright>,
     #[serde(skip_serializing_if = "Option::is_none")]
     tags: Option<Vec<CardTag>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -176,7 +189,8 @@ pub struct Stadium {
     #[serde(skip_serializing_if = "Option::is_none")]
     foil: Option<Foil>,
     size: CardSize,
-    artists: Artists,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    artists: Option<Artists>,
     regulation_mark: RegulationMark,
     set_icon: String,
     collector_number: CollectorNumber,
@@ -185,7 +199,8 @@ pub struct Stadium {
     rarity: String,
     rarity_icon: String,
 
-    copyright: Copyright,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    copyright: Option<Copyright>,
     #[serde(skip_serializing_if = "Option::is_none")]
     tags: Option<Vec<CardTag>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -201,6 +216,8 @@ pub struct Stadium {
 pub enum Energy {
     #[serde(rename = "BASIC")]
     BasicEnergy(BasicEnergy),
+    #[serde(rename = "SPECIAL")]
+    SpecialEnergy(SpecialEnergy),
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -219,14 +236,44 @@ pub struct BasicEnergy {
     collector_number: CollectorNumber,
 
     // NOTE: These fields may be combined in the future
+    rarity: Option<String>,
+    rarity_icon: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    copyright: Option<Copyright>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    tags: Option<Vec<CardTag>>,
+    _tcgl: Tcgl,
+    images: Images,
+    sort_number: NonZeroU16,
+    // types: Vec<EnergyType>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct SpecialEnergy {
+    name: String,
+    lang: Lang,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    foil: Option<Foil>,
+    size: CardSize,
+    // REVIEW: Do basic energies every have artist(s)?
+    // artists: Artists,
+    regulation_mark: RegulationMark,
+    set_icon: String,
+    collector_number: CollectorNumber,
+
+    // NOTE: These fields may be combined in the future
     rarity: String,
     rarity_icon: String,
 
-    copyright: Copyright,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    copyright: Option<Copyright>,
     #[serde(skip_serializing_if = "Option::is_none")]
     tags: Option<Vec<CardTag>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     flavor_text: Option<String>,
+    text: Vec<Text>,
     _tcgl: Tcgl,
     images: Images,
     sort_number: NonZeroU16,
@@ -238,6 +285,16 @@ pub struct BasicEnergy {
 pub enum Lang {
     #[serde(rename = "en-US")]
     EnUs,
+    #[serde(rename = "fr-FR")]
+    FrFr,
+    #[serde(rename = "it-IT")]
+    ItIt,
+    #[serde(rename = "de-DE")]
+    DeDe,
+    #[serde(rename = "es-ES")]
+    EsEs,
+    #[serde(rename = "pt-BR")]
+    PtBr,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -251,6 +308,8 @@ pub struct Foil {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub enum FoilType {
+    Stamped,
+    Cosmos,
     FlatSilver,
     SunPillar,
     SvHolo,
@@ -260,6 +319,7 @@ pub enum FoilType {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub enum FoilMask {
+    Stamped,
     Reverse,
     Holo,
     Etched,
@@ -294,9 +354,9 @@ pub enum RegulationMark {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct CollectorNumber {
-    denominator: String,
     full: String,
     numerator: String,
+    denominator: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -459,7 +519,7 @@ enum Text {
 struct Attack {
     name: String,
     text: String,
-    cost: Vec<EnergyType>,
+    cost: Vec<AttackCost>,
     #[serde(skip_serializing_if = "Option::is_none")]
     damage: Option<Damage>,
 }
@@ -501,6 +561,23 @@ struct Reminder {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 enum EnergyType {
+    Grass,
+    Fire,
+    Water,
+    Lightning,
+    Psychic,
+    Fighting,
+    Darkness,
+    Metal,
+    Dragon,
+    Colorless,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+enum AttackCost {
+    Free,
+
+    // TODO: Custom serde implementation to flatten EnergyType into this enum
     Grass,
     Fire,
     Water,
@@ -565,16 +642,26 @@ pub mod u32_hex {
 fn serde() {
     use serde_json::Value;
 
-    let json = std::fs::read_to_string("sv1.en-US.json").unwrap();
+    for dirent in std::fs::read_dir("sources").unwrap() {
+        let dirent = dirent.unwrap();
 
-    let cards = serde_json::from_str::<Vec<Card>>(&json).unwrap();
+        println!(
+            "reading {}",
+            dirent.path().file_name().unwrap().to_string_lossy()
+        );
 
-    let cards_roundtrip_through_parsed =
-        serde_json::from_str::<Vec<Card>>(&serde_json::to_string_pretty(&cards).unwrap()).unwrap();
+        let json = std::fs::read_to_string(dirent.path()).unwrap();
 
-    // println!("{serialized}");
+        let cards = serde_json::from_str::<Vec<Card>>(&json).unwrap();
 
-    assert_eq!(cards, cards_roundtrip_through_parsed);
+        let cards_roundtrip_through_parsed =
+            serde_json::from_str::<Vec<Card>>(&serde_json::to_string_pretty(&cards).unwrap())
+                .unwrap();
+
+        // println!("{serialized}");
+
+        assert_eq!(cards, cards_roundtrip_through_parsed);
+    }
 
     // dbg!(&cards);
 
@@ -585,7 +672,8 @@ fn serde() {
     //     //     continue;
     //     // }
 
-    //     let card: Card = serde_json::from_str(&serde_json::to_string(&value).unwrap()).unwrap();
+    //     let card: Card =
+    // serde_json::from_str(&serde_json::to_string(&value).unwrap()).unwrap();
 
     //     dbg!(card);
     // }
