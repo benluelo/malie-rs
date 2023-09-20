@@ -38,6 +38,19 @@
               src = ./.;
               cargoBuildCommand = "cargo build --release";
             };
+            fetch-sources = pkgs.writeShellApplication {
+              name = "fetch-sources";
+              runtimeInputs = [ pkgs.wget ];
+              text = ''
+                cd sources
+                find . -type f -delete
+
+                while IFS= read -r line
+                do
+                  wget "$line";
+                done < ../sources.txt
+              '';
+            };
           };
           devShells = {
             default = pkgs.mkShell {
