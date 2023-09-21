@@ -107,6 +107,10 @@ pub struct Item {
     #[serde(skip_serializing_if = "Option::is_none")]
     tags: Option<Vec<CardTag>>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    stage_text: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    hp: Option<NonZeroU16>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     flavor_text: Option<String>,
     text: Vec<Text>,
     _tcgl: Tcgl,
@@ -222,7 +226,7 @@ pub struct BasicEnergy {
     tags: Option<Vec<CardTag>>,
     _tcgl: Tcgl,
     images: Images,
-    // types: Vec<EnergyType>,
+    types: Vec<EnergyType>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -393,6 +397,8 @@ pub enum CardTag {
     Item,
     #[serde(rename = "TOOL")]
     Tool,
+    #[serde(rename = "PLAYABLE_TRAINER")]
+    PlayableTrainer,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -533,7 +539,8 @@ enum Text {
 #[serde(deny_unknown_fields)]
 struct Attack {
     name: String,
-    text: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    text: Option<String>,
     cost: Vec<AttackCost>,
     #[serde(skip_serializing_if = "Option::is_none")]
     damage: Option<Damage>,

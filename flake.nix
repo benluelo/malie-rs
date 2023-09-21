@@ -24,6 +24,13 @@
             lib = self.inputs.crane.lib.${system};
             nightly = lib.overrideToolchain self'.packages.rust-nightly;
           };
+
+          export_base_url = "https://cdn.malie.io/file/malie-io/tcgl/export";
+
+          # index = pkgs.fetchurl {
+          #   url = "${export_base_url}/index.json";
+          #   hash = "";
+          # };
         in {
           _module.args.pkgs = import nixpkgs {
             inherit system;
@@ -38,6 +45,7 @@
               src = ./.;
               cargoBuildCommand = "cargo build --release";
             };
+
             fetch-sources = pkgs.writeShellApplication {
               name = "fetch-sources";
               runtimeInputs = [ pkgs.wget ];
@@ -45,10 +53,12 @@
                 cd sources
                 find . -type f -delete
 
-                while IFS= read -r line
-                do
-                  wget "$line";
-                done < ../sources.txt
+                curl https://cdn.malie.io/file/malie-io/tcgl/export/index.json \
+                | jq -r '. | to_entries | map(.value | to_entries | map(.value)) | flatten | .[]' \
+                | while IFS= read -r line
+                  do
+                    wget "${export_base_url}/$line";
+                  done
               '';
             };
           };
