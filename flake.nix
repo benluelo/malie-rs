@@ -17,7 +17,7 @@
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems =
         [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
-        
+
       perSystem = { config, self', inputs', pkgs, system, ... }:
         let
           crane = rec {
@@ -31,14 +31,15 @@
           #   url = "${export_base_url}/index.json";
           #   hash = "";
           # };
-        in {
+        in
+        {
           _module.args.pkgs = import nixpkgs {
             inherit system;
             overlays = with inputs; [
               rust-overlay.overlays.default
             ];
           };
-        
+
           packages = {
             rust-nightly = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
             default = crane.nightly.buildPackage {
@@ -66,10 +67,10 @@
             default = pkgs.mkShell {
               buildInputs = [ self'.packages.rust-nightly ]
                 ++ (with pkgs; [
-                  jq
-                  moreutils
-                  rnix-lsp
-                ]);
+                jq
+                moreutils
+                rnix-lsp
+              ]);
             };
           };
         };

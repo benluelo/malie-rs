@@ -50,11 +50,11 @@ struct Pokemon {
     #[serde(skip_serializing_if = "Option::is_none")]
     resistance: Option<Resistance>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    retreat: Option<NonZeroU8>,
+    retreat: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     flavor_text: Option<String>,
     text: Vec<Text>,
-    _tcgl: Tcgl,
+    ext: Ext,
     images: Images,
     types: Vec<EnergyType>,
 }
@@ -113,7 +113,7 @@ pub struct Item {
     #[serde(skip_serializing_if = "Option::is_none")]
     flavor_text: Option<String>,
     text: Vec<Text>,
-    _tcgl: Tcgl,
+    ext: Ext,
     images: Images,
 }
 
@@ -139,7 +139,7 @@ pub struct Supporter {
     #[serde(skip_serializing_if = "Option::is_none")]
     tags: Option<Vec<CardTag>>,
     text: Vec<Text>,
-    _tcgl: Tcgl,
+    ext: Ext,
     images: Images,
 }
 
@@ -165,7 +165,7 @@ pub struct Tool {
     #[serde(skip_serializing_if = "Option::is_none")]
     flavor_text: Option<String>,
     text: Vec<Text>,
-    _tcgl: Tcgl,
+    ext: Ext,
     images: Images,
 }
 
@@ -191,7 +191,7 @@ pub struct Stadium {
     #[serde(skip_serializing_if = "Option::is_none")]
     flavor_text: Option<String>,
     text: Vec<Text>,
-    _tcgl: Tcgl,
+    ext: Ext,
     images: Images,
 }
 
@@ -224,7 +224,7 @@ pub struct BasicEnergy {
     copyright: Option<Copyright>,
     #[serde(skip_serializing_if = "Option::is_none")]
     tags: Option<Vec<CardTag>>,
-    _tcgl: Tcgl,
+    ext: Ext,
     images: Images,
     types: Vec<EnergyType>,
 }
@@ -251,7 +251,7 @@ pub struct SpecialEnergy {
     #[serde(skip_serializing_if = "Option::is_none")]
     flavor_text: Option<String>,
     text: Vec<Text>,
-    _tcgl: Tcgl,
+    ext: Ext,
     images: Images,
     // types: Vec<EnergyType>,
 }
@@ -290,6 +290,7 @@ pub enum FoilType {
     SunPillar,
     SvHolo,
     SvUltra,
+    SvUltraScodix,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -332,6 +333,7 @@ pub enum RegulationMark {
     E,
     F,
     G,
+    H,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -361,20 +363,24 @@ pub enum RarityDesignation {
     SpecialIllustrationRare,
     UltraRare,
     HyperRare,
+    ShinyRare,
+    ShinyUltraRare,
     Promo,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum RarityIcon {
-    BlackCircle,
-    BlackDiamond,
-    BlackStar,
+    SolidCircle,
+    SolidDiamond,
+    SolidStar,
     TwoBlackStars,
     GoldStar,
     TwoGoldStars,
     ThreeGoldStars,
     TwoSilverStars,
+    ShinyStar,
+    TwoShinyStars,
     BlackStarPromo,
 }
 
@@ -387,18 +393,16 @@ pub struct Copyright {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[serde(deny_unknown_fields, rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum CardTag {
-    #[serde(rename = "EX_LOWER")]
     ExLower,
-    #[serde(rename = "TERA")]
     Tera,
-    #[serde(rename = "ITEM")]
     Item,
-    #[serde(rename = "TOOL")]
     Tool,
-    #[serde(rename = "PLAYABLE_TRAINER")]
     PlayableTrainer,
+    Future,
+    Ancient,
+    Shiny,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -442,6 +446,12 @@ struct Resistance {
 pub enum ResistanceOperator {
     #[serde(rename = "-")]
     Subtract,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Ext {
+    tcgl: Tcgl,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
