@@ -19,14 +19,14 @@ time::serde::format_description!(
 );
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-#[serde(tag = "card_type")]
+#[serde(
+    deny_unknown_fields,
+    tag = "card_type",
+    rename_all = "SCREAMING_SNAKE_CASE"
+)]
 enum Card {
-    #[serde(rename = "POKEMON")]
     Pokemon(Pokemon),
-    #[serde(rename = "TRAINER")]
     Trainer(Trainer),
-    #[serde(rename = "ENERGY")]
     Energy(Energy),
 }
 
@@ -69,30 +69,14 @@ struct Pokemon {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[serde(deny_unknown_fields, rename_all = "SCREAMING_SNAKE_CASE")]
 #[serde(tag = "subtype")]
 pub enum Trainer {
-    #[serde(rename = "ITEM")]
     Item(Item),
-    #[serde(rename = "SUPPORTER")]
     Supporter(Supporter),
-    #[serde(rename = "TOOL")]
     Tool(Tool),
-    #[serde(rename = "STADIUM")]
     Stadium(Stadium),
 }
-
-// #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-// pub enum TrainerSubtype {
-//     #[serde(rename = "ITEM")]
-//     Item,
-//     #[serde(rename = "SUPPORTER")]
-//     Supporter,
-//     #[serde(rename = "TOOL")]
-//     Tool,
-//     #[serde(rename = "STADIUM")]
-//     Stadium,
-// }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -212,9 +196,9 @@ pub struct Stadium {
 #[serde(tag = "subtype")]
 pub enum Energy {
     #[serde(rename = "BASIC")]
-    BasicEnergy(BasicEnergy),
+    Basic(BasicEnergy),
     #[serde(rename = "SPECIAL")]
-    SpecialEnergy(SpecialEnergy),
+    Special(SpecialEnergy),
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -318,9 +302,8 @@ pub enum FoilMask {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[serde(deny_unknown_fields, rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum CardSize {
-    #[serde(rename = "STANDARD")]
     Standard,
 }
 
@@ -422,13 +405,10 @@ pub enum CardTag {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[serde(deny_unknown_fields, rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum Stage {
-    #[serde(rename = "BASIC")]
     Basic,
-    #[serde(rename = "STAGE1")]
     Stage1,
-    #[serde(rename = "STAGE2")]
     Stage2,
 }
 
@@ -553,19 +533,13 @@ pub enum DamageSuffix {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-#[serde(tag = "kind")]
+#[serde(tag = "kind", rename_all = "SCREAMING_SNAKE_CASE")]
 enum Text {
-    #[serde(rename = "ATTACK")]
     Attack(Attack),
-    #[serde(rename = "ABILITY")]
     Ability(Ability),
-    #[serde(rename = "RULE_BOX")]
     RuleBox(RuleBox),
-    #[serde(rename = "EFFECT")]
     Effect(Effect),
-    #[serde(rename = "TEXT_BOX")]
     TextBox(TextBox),
-    #[serde(rename = "REMINDER")]
     Reminder(Reminder),
 }
 
@@ -740,6 +714,6 @@ fn serde() {
 
         assert_eq!(value, value_roundtrip);
 
-        dbg!(&cards);
+        // dbg!(&cards);
     }
 }
