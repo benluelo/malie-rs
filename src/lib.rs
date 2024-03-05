@@ -1,14 +1,22 @@
 use std::{
-    fmt::Debug,
+    fmt::Display,
     num::{NonZeroU16, NonZeroU8},
     str::FromStr,
 };
 
+use custom_debug_derive::Debug;
 use serde::{
     de::{self, Visitor},
     Deserialize, Serialize,
 };
+use time::{OffsetDateTime, PrimitiveDateTime};
 use url::Url;
+
+time::serde::format_description!(
+    reldate,
+    PrimitiveDateTime,
+    "[year]-[month]-[day] [hour]:[minute]:[second]+00:00"
+);
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -472,7 +480,8 @@ struct Tcgl {
     key: String,
     #[serde(rename = "longFormID")]
     long_form_id: String,
-    reldate: String,
+    #[serde(with = "reldate")]
+    reldate: PrimitiveDateTime,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -492,26 +501,33 @@ struct TcglImages {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ImageJpg {
+    #[debug(with = "display")]
     front: Url,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ImagePng {
+    #[debug(with = "display")]
     front: Url,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[debug(with = "display_opt")]
     foil: Option<Url>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[debug(with = "display_opt")]
     etch: Option<Url>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ImageTex {
+    #[debug(with = "display")]
     front: Url,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[debug(with = "display_opt")]
     foil: Option<Url>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[debug(with = "display_opt")]
     etch: Option<Url>,
 }
 
@@ -680,6 +696,25 @@ pub mod u32_hex {
     }
 }
 
+pub fn display<T: Display>(url: &T, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    write!(f, "{url}")
+}
+
+pub fn display_opt<T: Display>(url: &Option<T>, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    match url {
+        Some(url) => f.debug_tuple("Some").field(&DebugAsDisplay(url)).finish(),
+        None => f.write_str("None"),
+    }
+}
+
+struct DebugAsDisplay<T>(T);
+
+impl<T: Display> core::fmt::Debug for DebugAsDisplay<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 #[test]
 fn serde() {
     use serde_json::Value;
@@ -700,26 +735,11 @@ fn serde() {
 
         let value_roundtrip = serde_json::to_value(&cards).unwrap();
 
-        // println!("{serialized}");
-
         std::fs::write("out.before", format!("{value:#?}")).unwrap();
         std::fs::write("out.after", format!("{value_roundtrip:#?}")).unwrap();
 
         assert_eq!(value, value_roundtrip);
+
+        dbg!(&cards);
     }
-
-    // dbg!(&cards);
-
-    // for value in cards {
-    //     dbg!(&value["name"]);
-
-    //     // if value["card_type"] != "POKEMON" {
-    //     //     continue;
-    //     // }
-
-    //     let card: Card =
-    // serde_json::from_str(&serde_json::to_string(&value).unwrap()).unwrap();
-
-    //     dbg!(card);
-    // }
 }
