@@ -36,6 +36,7 @@ struct Pokemon {
     regulation_mark: RegulationMark,
     set_icon: String,
     collector_number: CollectorNumber,
+    #[serde(skip_serializing_if = "Option::is_none")]
     rarity: Option<Rarity>,
     #[serde(skip_serializing_if = "Option::is_none")]
     copyright: Option<Copyright>,
@@ -101,6 +102,7 @@ pub struct Item {
     regulation_mark: RegulationMark,
     set_icon: String,
     collector_number: CollectorNumber,
+    #[serde(skip_serializing_if = "Option::is_none")]
     rarity: Option<Rarity>,
     #[serde(skip_serializing_if = "Option::is_none")]
     copyright: Option<Copyright>,
@@ -133,6 +135,7 @@ pub struct Supporter {
     regulation_mark: RegulationMark,
     set_icon: String,
     collector_number: CollectorNumber,
+    #[serde(skip_serializing_if = "Option::is_none")]
     rarity: Option<Rarity>,
     #[serde(skip_serializing_if = "Option::is_none")]
     copyright: Option<Copyright>,
@@ -157,6 +160,7 @@ pub struct Tool {
     regulation_mark: RegulationMark,
     set_icon: String,
     collector_number: CollectorNumber,
+    #[serde(skip_serializing_if = "Option::is_none")]
     rarity: Option<Rarity>,
     #[serde(skip_serializing_if = "Option::is_none")]
     copyright: Option<Copyright>,
@@ -183,6 +187,7 @@ pub struct Stadium {
     regulation_mark: RegulationMark,
     set_icon: String,
     collector_number: CollectorNumber,
+    #[serde(skip_serializing_if = "Option::is_none")]
     rarity: Option<Rarity>,
     #[serde(skip_serializing_if = "Option::is_none")]
     copyright: Option<Copyright>,
@@ -219,6 +224,7 @@ pub struct BasicEnergy {
     // regulation_mark: RegulationMark,
     set_icon: String,
     collector_number: CollectorNumber,
+    #[serde(skip_serializing_if = "Option::is_none")]
     rarity: Option<Rarity>,
     #[serde(skip_serializing_if = "Option::is_none")]
     copyright: Option<Copyright>,
@@ -243,6 +249,7 @@ pub struct SpecialEnergy {
     regulation_mark: RegulationMark,
     set_icon: String,
     collector_number: CollectorNumber,
+    #[serde(skip_serializing_if = "Option::is_none")]
     rarity: Option<Rarity>,
     #[serde(skip_serializing_if = "Option::is_none")]
     copyright: Option<Copyright>,
@@ -341,6 +348,7 @@ pub enum RegulationMark {
 struct CollectorNumber {
     full: String,
     numerator: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     denominator: Option<String>,
     numeric: NonZeroU16,
 }
@@ -580,6 +588,7 @@ struct Effect {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct TextBox {
+    #[serde(skip_serializing_if = "Option::is_none")]
     name: Option<String>,
     text: String,
 }
@@ -642,10 +651,10 @@ pub mod u32_hex {
     where
         D: serde::Deserializer<'de>,
     {
-        <&str>::deserialize(deserializer).and_then(|s| {
+        <String>::deserialize(deserializer).and_then(|s| {
             s.strip_prefix(HEX_ENCODING_PREFIX)
                 .ok_or(de::Error::invalid_value(
-                    de::Unexpected::Str(s),
+                    de::Unexpected::Str(&s),
                     &"hex encoded u32 bytes, 0x-prefixed",
                 ))
                 .and_then(|maybe_hex| {
@@ -685,15 +694,18 @@ fn serde() {
 
         let json = std::fs::read_to_string(dirent.path()).unwrap();
 
-        let cards = serde_json::from_str::<Vec<Card>>(&json).unwrap();
+        let value = serde_json::from_str::<Value>(&json).unwrap();
 
-        let cards_roundtrip_through_parsed =
-            serde_json::from_str::<Vec<Card>>(&serde_json::to_string_pretty(&cards).unwrap())
-                .unwrap();
+        let cards = serde_json::from_value::<Vec<Card>>(value.clone()).unwrap();
+
+        let value_roundtrip = serde_json::to_value(&cards).unwrap();
 
         // println!("{serialized}");
 
-        assert_eq!(cards, cards_roundtrip_through_parsed);
+        std::fs::write("out.before", format!("{value:#?}")).unwrap();
+        std::fs::write("out.after", format!("{value_roundtrip:#?}")).unwrap();
+
+        assert_eq!(value, value_roundtrip);
     }
 
     // dbg!(&cards);
