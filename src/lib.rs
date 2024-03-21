@@ -1,15 +1,8 @@
-use std::{
-    fmt::Display,
-    num::{NonZeroU16, NonZeroU8},
-    str::FromStr,
-};
+use std::{fmt::Display, num::NonZeroU16};
 
 use custom_debug_derive::Debug;
-use serde::{
-    de::{self, Visitor},
-    Deserialize, Serialize,
-};
-use time::{OffsetDateTime, PrimitiveDateTime};
+use serde::{Deserialize, Serialize};
+use time::PrimitiveDateTime;
 use url::Url;
 
 time::serde::format_description!(
@@ -290,6 +283,7 @@ pub enum FoilType {
     SvHolo,
     SvUltra,
     SvUltraScodix,
+    AceFoil,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -365,6 +359,7 @@ pub enum RarityDesignation {
     ShinyRare,
     ShinyUltraRare,
     Promo,
+    AceSpecRare,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -381,6 +376,7 @@ pub enum RarityIcon {
     ShinyStar,
     TwoShinyStars,
     BlackStarPromo,
+    PinkStar,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -402,6 +398,7 @@ pub enum CardTag {
     Future,
     Ancient,
     Shiny,
+    AceSpec,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
