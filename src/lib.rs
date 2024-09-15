@@ -1,6 +1,5 @@
-use std::{fmt::Display, num::NonZeroU16};
+use std::{borrow::Cow, fmt::Display, num::NonZeroU16};
 
-use custom_debug_derive::Debug;
 use serde::{Deserialize, Serialize};
 use time::PrimitiveDateTime;
 use url::Url;
@@ -17,35 +16,38 @@ time::serde::format_description!(
     tag = "card_type",
     rename_all = "SCREAMING_SNAKE_CASE"
 )]
-enum Card {
-    Pokemon(Pokemon),
-    Trainer(Trainer),
-    Energy(Energy),
+enum Card<'a> {
+    Pokemon(#[serde(borrow)] Pokemon<'a>),
+    Trainer(#[serde(borrow)] Trainer<'a>),
+    Energy(#[serde(borrow)] Energy<'a>),
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Pokemon {
-    name: String,
+struct Pokemon<'a> {
+    #[serde(borrow)]
+    name: Cow<'a, str>,
     lang: Lang,
     #[serde(skip_serializing_if = "Option::is_none")]
     foil: Option<Foil>,
     size: CardSize,
     back: CardBack,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    artists: Option<Artists>,
+    #[serde(borrow, skip_serializing_if = "Option::is_none")]
+    artists: Option<Artists<'a>>,
     regulation_mark: RegulationMark,
-    set_icon: String,
-    collector_number: CollectorNumber,
+    #[serde(borrow)]
+    set_icon: Cow<'a, str>,
+    #[serde(borrow)]
+    collector_number: CollectorNumber<'a>,
     #[serde(skip_serializing_if = "Option::is_none")]
     rarity: Option<Rarity>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    copyright: Option<Copyright>,
+    #[serde(borrow, skip_serializing_if = "Option::is_none")]
+    copyright: Option<Copyright<'a>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     tags: Option<Vec<CardTag>>,
     stage: Stage,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    stage_text: Option<String>,
+    #[serde(borrow, skip_serializing_if = "Option::is_none")]
+    stage_text: Option<Cow<'a, str>>,
     hp: NonZeroU16,
     #[serde(skip_serializing_if = "Option::is_none")]
     weakness: Option<Weakness>,
@@ -53,10 +55,12 @@ struct Pokemon {
     resistance: Option<Resistance>,
     #[serde(skip_serializing_if = "Option::is_none")]
     retreat: Option<u8>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    flavor_text: Option<String>,
-    text: Vec<Text>,
-    ext: Ext,
+    #[serde(borrow, skip_serializing_if = "Option::is_none")]
+    flavor_text: Option<Cow<'a, str>>,
+    #[serde(borrow)]
+    text: Vec<Text<'a>>,
+    #[serde(borrow)]
+    ext: Ext<'a>,
     images: Images,
     types: Vec<EnergyType>,
 }
@@ -64,140 +68,159 @@ struct Pokemon {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, rename_all = "SCREAMING_SNAKE_CASE")]
 #[serde(tag = "subtype")]
-pub enum Trainer {
-    Item(Item),
-    Supporter(Supporter),
-    Tool(Tool),
-    Stadium(Stadium),
+pub enum Trainer<'a> {
+    Item(#[serde(borrow)] Item<'a>),
+    Supporter(#[serde(borrow)] Supporter<'a>),
+    Tool(#[serde(borrow)] Tool<'a>),
+    Stadium(#[serde(borrow)] Stadium<'a>),
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct Item {
-    // pub struct Trainer {
-    // subtype: TrainerSubtype,
-    name: String,
+pub struct Item<'a> {
+    #[serde(borrow)]
+    name: Cow<'a, str>,
     lang: Lang,
     #[serde(skip_serializing_if = "Option::is_none")]
     foil: Option<Foil>,
     size: CardSize,
     back: CardBack,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    artists: Option<Artists>,
+    #[serde(borrow, skip_serializing_if = "Option::is_none")]
+    artists: Option<Artists<'a>>,
     regulation_mark: RegulationMark,
-    set_icon: String,
-    collector_number: CollectorNumber,
+    #[serde(borrow)]
+    set_icon: Cow<'a, str>,
+    #[serde(borrow)]
+    collector_number: CollectorNumber<'a>,
     #[serde(skip_serializing_if = "Option::is_none")]
     rarity: Option<Rarity>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    copyright: Option<Copyright>,
+    #[serde(borrow, skip_serializing_if = "Option::is_none")]
+    copyright: Option<Copyright<'a>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     tags: Option<Vec<CardTag>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    stage_text: Option<String>,
+    #[serde(borrow, skip_serializing_if = "Option::is_none")]
+    stage_text: Option<Cow<'a, str>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     hp: Option<NonZeroU16>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    flavor_text: Option<String>,
-    text: Vec<Text>,
-    ext: Ext,
+    #[serde(borrow, skip_serializing_if = "Option::is_none")]
+    flavor_text: Option<Cow<'a, str>>,
+    #[serde(borrow)]
+    text: Vec<Text<'a>>,
+    #[serde(borrow)]
+    ext: Ext<'a>,
     images: Images,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct Supporter {
-    name: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    subtitle: Option<String>,
+pub struct Supporter<'a> {
+    #[serde(borrow)]
+    name: Cow<'a, str>,
+    #[serde(borrow, skip_serializing_if = "Option::is_none")]
+    subtitle: Option<Cow<'a, str>>,
     lang: Lang,
     #[serde(skip_serializing_if = "Option::is_none")]
     foil: Option<Foil>,
     size: CardSize,
     back: CardBack,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    artists: Option<Artists>,
+    #[serde(borrow, skip_serializing_if = "Option::is_none")]
+    artists: Option<Artists<'a>>,
     regulation_mark: RegulationMark,
-    set_icon: String,
-    collector_number: CollectorNumber,
+    #[serde(borrow)]
+    set_icon: Cow<'a, str>,
+    #[serde(borrow)]
+    collector_number: CollectorNumber<'a>,
     #[serde(skip_serializing_if = "Option::is_none")]
     rarity: Option<Rarity>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    copyright: Option<Copyright>,
+    #[serde(borrow, skip_serializing_if = "Option::is_none")]
+    copyright: Option<Copyright<'a>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     tags: Option<Vec<CardTag>>,
-    text: Vec<Text>,
-    ext: Ext,
+    #[serde(borrow)]
+    text: Vec<Text<'a>>,
+    #[serde(borrow)]
+    ext: Ext<'a>,
     images: Images,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct Tool {
-    name: String,
+pub struct Tool<'a> {
+    #[serde(borrow)]
+    name: Cow<'a, str>,
     lang: Lang,
     #[serde(skip_serializing_if = "Option::is_none")]
     foil: Option<Foil>,
     size: CardSize,
     back: CardBack,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    artists: Option<Artists>,
+    #[serde(borrow, skip_serializing_if = "Option::is_none")]
+    artists: Option<Artists<'a>>,
     regulation_mark: RegulationMark,
-    set_icon: String,
-    collector_number: CollectorNumber,
+    #[serde(borrow)]
+    set_icon: Cow<'a, str>,
+    #[serde(borrow)]
+    collector_number: CollectorNumber<'a>,
     #[serde(skip_serializing_if = "Option::is_none")]
     rarity: Option<Rarity>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    copyright: Option<Copyright>,
+    #[serde(borrow, skip_serializing_if = "Option::is_none")]
+    copyright: Option<Copyright<'a>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     tags: Option<Vec<CardTag>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    flavor_text: Option<String>,
-    text: Vec<Text>,
-    ext: Ext,
+    #[serde(borrow, skip_serializing_if = "Option::is_none")]
+    flavor_text: Option<Cow<'a, str>>,
+    #[serde(borrow)]
+    text: Vec<Text<'a>>,
+    #[serde(borrow)]
+    ext: Ext<'a>,
     images: Images,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct Stadium {
-    name: String,
+pub struct Stadium<'a> {
+    #[serde(borrow)]
+    name: Cow<'a, str>,
     lang: Lang,
     #[serde(skip_serializing_if = "Option::is_none")]
     foil: Option<Foil>,
     size: CardSize,
     back: CardBack,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    artists: Option<Artists>,
+    #[serde(borrow, skip_serializing_if = "Option::is_none")]
+    artists: Option<Artists<'a>>,
     regulation_mark: RegulationMark,
-    set_icon: String,
-    collector_number: CollectorNumber,
+    #[serde(borrow)]
+    set_icon: Cow<'a, str>,
+    #[serde(borrow)]
+    collector_number: CollectorNumber<'a>,
     #[serde(skip_serializing_if = "Option::is_none")]
     rarity: Option<Rarity>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    copyright: Option<Copyright>,
+    #[serde(borrow, skip_serializing_if = "Option::is_none")]
+    copyright: Option<Copyright<'a>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     tags: Option<Vec<CardTag>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    flavor_text: Option<String>,
-    text: Vec<Text>,
-    ext: Ext,
+    #[serde(borrow, skip_serializing_if = "Option::is_none")]
+    flavor_text: Option<Cow<'a, str>>,
+    #[serde(borrow)]
+    text: Vec<Text<'a>>,
+    #[serde(borrow)]
+    ext: Ext<'a>,
     images: Images,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "subtype")]
-pub enum Energy {
+pub enum Energy<'a> {
     #[serde(rename = "BASIC")]
-    Basic(BasicEnergy),
+    Basic(#[serde(borrow)] BasicEnergy<'a>),
     #[serde(rename = "SPECIAL")]
-    Special(SpecialEnergy),
+    Special(#[serde(borrow)] SpecialEnergy<'a>),
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct BasicEnergy {
-    name: String,
+pub struct BasicEnergy<'a> {
+    #[serde(borrow)]
+    name: Cow<'a, str>,
     lang: Lang,
     #[serde(skip_serializing_if = "Option::is_none")]
     foil: Option<Foil>,
@@ -207,23 +230,27 @@ pub struct BasicEnergy {
     // artists: Artists,
     // REVIEW: Do basic energies every have a regulation mark?
     // regulation_mark: RegulationMark,
-    set_icon: String,
-    collector_number: CollectorNumber,
+    #[serde(borrow)]
+    set_icon: Cow<'a, str>,
+    #[serde(borrow)]
+    collector_number: CollectorNumber<'a>,
     #[serde(skip_serializing_if = "Option::is_none")]
     rarity: Option<Rarity>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    copyright: Option<Copyright>,
+    #[serde(borrow, skip_serializing_if = "Option::is_none")]
+    copyright: Option<Copyright<'a>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     tags: Option<Vec<CardTag>>,
-    ext: Ext,
+    #[serde(borrow)]
+    ext: Ext<'a>,
     images: Images,
     types: Vec<EnergyType>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct SpecialEnergy {
-    name: String,
+pub struct SpecialEnergy<'a> {
+    #[serde(borrow)]
+    name: Cow<'a, str>,
     lang: Lang,
     #[serde(skip_serializing_if = "Option::is_none")]
     foil: Option<Foil>,
@@ -232,18 +259,22 @@ pub struct SpecialEnergy {
     // REVIEW: Do basic energies every have artist(s)?
     // artists: Artists,
     regulation_mark: RegulationMark,
-    set_icon: String,
-    collector_number: CollectorNumber,
+    #[serde(borrow)]
+    set_icon: Cow<'a, str>,
+    #[serde(borrow)]
+    collector_number: CollectorNumber<'a>,
     #[serde(skip_serializing_if = "Option::is_none")]
     rarity: Option<Rarity>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    copyright: Option<Copyright>,
+    #[serde(borrow, skip_serializing_if = "Option::is_none")]
+    copyright: Option<Copyright<'a>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     tags: Option<Vec<CardTag>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    flavor_text: Option<String>,
-    text: Vec<Text>,
-    ext: Ext,
+    #[serde(borrow, skip_serializing_if = "Option::is_none")]
+    flavor_text: Option<Cow<'a, str>>,
+    #[serde(borrow)]
+    text: Vec<Text<'a>>,
+    #[serde(borrow)]
+    ext: Ext<'a>,
     images: Images,
     // types: Vec<EnergyType>,
 }
@@ -310,9 +341,11 @@ pub enum CardBack {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct Artists {
-    text: String,
-    list: Vec<String>,
+pub struct Artists<'a> {
+    #[serde(borrow)]
+    text: Cow<'a, str>,
+    #[serde(borrow)]
+    list: Vec<Cow<'a, str>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -330,11 +363,13 @@ pub enum RegulationMark {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct CollectorNumber {
-    full: String,
-    numerator: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    denominator: Option<String>,
+struct CollectorNumber<'a> {
+    #[serde(borrow)]
+    full: Cow<'a, str>,
+    #[serde(borrow)]
+    numerator: Cow<'a, str>,
+    #[serde(borrow, skip_serializing_if = "Option::is_none")]
+    denominator: Option<Cow<'a, str>>,
     numeric: NonZeroU16,
 }
 
@@ -381,8 +416,9 @@ pub enum RarityIcon {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct Copyright {
-    text: String,
+pub struct Copyright<'a> {
+    #[serde(borrow)]
+    text: Cow<'a, str>,
     // REVIEW: Enum?
     year: u16,
 }
@@ -443,20 +479,24 @@ pub enum ResistanceOperator {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct Ext {
-    tcgl: Tcgl,
+pub struct Ext<'a> {
+    #[serde(borrow)]
+    tcgl: Tcgl<'a>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Tcgl {
+struct Tcgl<'a> {
     #[serde(rename = "archetypeID", with = "crate::u32_hex")]
     archetype_id: u32,
     #[serde(rename = "cardID")]
-    card_id: String,
-    key: String,
+    #[serde(borrow)]
+    card_id: Cow<'a, str>,
+    #[serde(borrow)]
+    key: Cow<'a, str>,
     #[serde(rename = "longFormID")]
-    long_form_id: String,
+    #[serde(borrow)]
+    long_form_id: Cow<'a, str>,
     #[serde(with = "reldate")]
     reldate: PrimitiveDateTime,
 }
@@ -478,33 +518,26 @@ struct TcglImages {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ImageJpg {
-    #[debug(with = "display")]
     front: Url,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ImagePng {
-    #[debug(with = "display")]
     front: Url,
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[debug(with = "display_opt")]
     foil: Option<Url>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[debug(with = "display_opt")]
     etch: Option<Url>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ImageTex {
-    #[debug(with = "display")]
     front: Url,
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[debug(with = "display_opt")]
     foil: Option<Url>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[debug(with = "display_opt")]
     etch: Option<Url>,
 }
 
@@ -531,21 +564,22 @@ pub enum DamageSuffix {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 #[serde(tag = "kind", rename_all = "SCREAMING_SNAKE_CASE")]
-enum Text {
-    Attack(Attack),
-    Ability(Ability),
-    RuleBox(RuleBox),
-    Effect(Effect),
-    TextBox(TextBox),
-    Reminder(Reminder),
+enum Text<'a> {
+    Attack(#[serde(borrow)] Attack<'a>),
+    Ability(#[serde(borrow)] Ability<'a>),
+    RuleBox(#[serde(borrow)] RuleBox<'a>),
+    Effect(#[serde(borrow)] Effect<'a>),
+    TextBox(#[serde(borrow)] TextBox<'a>),
+    Reminder(#[serde(borrow)] Reminder<'a>),
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Attack {
-    name: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    text: Option<String>,
+struct Attack<'a> {
+    #[serde(borrow)]
+    name: Cow<'a, str>,
+    #[serde(borrow, skip_serializing_if = "Option::is_none")]
+    text: Option<Cow<'a, str>>,
     cost: Vec<AttackCost>,
     #[serde(skip_serializing_if = "Option::is_none")]
     damage: Option<Damage>,
@@ -553,37 +587,45 @@ struct Attack {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Ability {
-    name: String,
-    text: String,
+struct Ability<'a> {
+    #[serde(borrow)]
+    name: Cow<'a, str>,
+    #[serde(borrow)]
+    text: Cow<'a, str>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct RuleBox {
-    name: String,
-    text: String,
+struct RuleBox<'a> {
+    #[serde(borrow)]
+    name: Cow<'a, str>,
+    #[serde(borrow)]
+    text: Cow<'a, str>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Effect {
-    name: String,
-    text: String,
+struct Effect<'a> {
+    #[serde(borrow)]
+    name: Cow<'a, str>,
+    #[serde(borrow)]
+    text: Cow<'a, str>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct TextBox {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    name: Option<String>,
-    text: String,
+struct TextBox<'a> {
+    #[serde(borrow, skip_serializing_if = "Option::is_none")]
+    name: Option<Cow<'a, str>>,
+    #[serde(borrow)]
+    text: Cow<'a, str>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Reminder {
-    text: String,
+struct Reminder<'a> {
+    #[serde(borrow)]
+    text: Cow<'a, str>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -688,8 +730,6 @@ impl<T: Display> core::fmt::Debug for DebugAsDisplay<T> {
 
 #[test]
 fn serde() {
-    use serde_json::Value;
-
     for dirent in std::fs::read_dir("sources").unwrap() {
         let dirent = dirent.unwrap();
 
@@ -700,16 +740,19 @@ fn serde() {
 
         let json = std::fs::read_to_string(dirent.path()).unwrap();
 
-        let value = serde_json::from_str::<Value>(&json).unwrap();
+        let cards = serde_json::from_str::<Vec<Card>>(&json).unwrap();
 
-        let cards = serde_json::from_value::<Vec<Card>>(value.clone()).unwrap();
+        println!("{} cards", cards.len());
 
-        let value_roundtrip = serde_json::to_value(&cards).unwrap();
+        let roundtrip = serde_json::to_string_pretty(&cards).unwrap();
 
-        std::fs::write("out.before", format!("{value:#?}")).unwrap();
-        std::fs::write("out.after", format!("{value_roundtrip:#?}")).unwrap();
+        // std::fs::write("out.before", format!("{value:#?}")).unwrap();
+        // std::fs::write("out.after", format!("{value_roundtrip:#?}")).unwrap();
 
-        assert_eq!(value, value_roundtrip);
+        assert_eq!(
+            serde_json::from_str::<serde_json::Value>(&json).unwrap(),
+            serde_json::from_str::<serde_json::Value>(&roundtrip).unwrap()
+        );
 
         // dbg!(&cards);
     }
