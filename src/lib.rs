@@ -709,25 +709,6 @@ pub mod u32_hex {
     }
 }
 
-pub fn display<T: Display>(url: &T, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-    write!(f, "{url}")
-}
-
-pub fn display_opt<T: Display>(url: &Option<T>, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-    match url {
-        Some(url) => f.debug_tuple("Some").field(&DebugAsDisplay(url)).finish(),
-        None => f.write_str("None"),
-    }
-}
-
-struct DebugAsDisplay<T>(T);
-
-impl<T: Display> core::fmt::Debug for DebugAsDisplay<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
 #[test]
 fn serde() {
     for dirent in std::fs::read_dir("sources").unwrap() {
