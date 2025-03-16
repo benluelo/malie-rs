@@ -707,7 +707,7 @@ pub(crate) mod u32_hex {
 
 #[test]
 fn serde() {
-    for dirent in std::fs::read_dir("sources").unwrap() {
+    for dirent in std::fs::read_dir(std::env::var("SOURCES_DIR").unwrap()).unwrap() {
         let dirent = dirent.unwrap();
 
         println!(
@@ -715,7 +715,9 @@ fn serde() {
             dirent.path().file_name().unwrap().to_string_lossy()
         );
 
-        let json = std::fs::read_to_string(dirent.path()).unwrap();
+        let path = dirent.path();
+
+        let json = std::fs::read_to_string(path).unwrap();
 
         let cards = serde_json::from_str::<Vec<Card>>(&json).unwrap();
 

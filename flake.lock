@@ -33,6 +33,18 @@
         "type": "github"
       }
     },
+    "malie": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-NkuUvBkIqV/ps8UI4Yc8rNH8V4aJRvtcdu8VmHe9Txg=",
+        "type": "file",
+        "url": "https://cdn.malie.io/file/malie-io/tcgl/export/index.json"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://cdn.malie.io/file/malie-io/tcgl/export/index.json"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1742069588,
@@ -68,6 +80,7 @@
       "inputs": {
         "crane": "crane",
         "flake-parts": "flake-parts",
+        "malie": "malie",
         "nixpkgs": "nixpkgs",
         "rust-overlay": "rust-overlay"
       }

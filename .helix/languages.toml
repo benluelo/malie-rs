@@ -1,0 +1,5 @@
+[language-server.nixd]
+command = "nixd"
+
+[language-server.nixd.config.nixpkgs]
+expr = "import (builtins.getFlake (builtins.toString ./.)).inputs.nixpkgs { }"

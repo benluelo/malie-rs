@@ -11,55 +11,89 @@
     crane = {
       url = "github:ipetkov/crane";
     };
+    malie = {
+      url = "https://cdn.malie.io/file/malie-io/tcgl/export/index.json";
+      flake = false;
+    };
   };
-  outputs = inputs@{ self, nixpkgs, rust-overlay, flake-parts, ... }:
+  outputs = inputs@{ nixpkgs, rust-overlay, flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems =
         [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
 
       perSystem = { config, self', inputs', pkgs, system, ... }:
         let
-          crane = rec {
-            lib = self.inputs.crane.lib.${system};
-            nightly = lib.overrideToolchain self'.packages.rust-nightly;
+          dbg =
+            value:
+            builtins.trace (
+              if value ? type && value.type == "derivation" then
+                "derivation: ${value}"
+              else
+                pkgs.lib.generators.toPretty { } value
+            ) value;
+
+          crane = {
+            lib = (inputs.crane.mkLib pkgs).overrideToolchain (_: self'.packages.rust-nightly);
           };
 
-          export_base_url = "https://cdn.malie.io/file/malie-io/tcgl/export";
+          packageVersion = builtins.elemAt (pkgs.lib.strings.splitString "+" (builtins.fromTOML (builtins.readFile ./Cargo.toml)).package.version) 1;
 
-          # index = pkgs.fetchurl {
-          #   url = "${export_base_url}/index.json";
-          #   hash = "";
-          # };
+          index = builtins.fromJSON (builtins.readFile inputs.malie.outPath);
+
+          sources = pkgs.linkFarm "malie" (pkgs.lib.flatten (
+            pkgs.lib.mapAttrsToList (
+              lang: pkgs.lib.mapAttrsToList (
+                setName: setInfo:
+                let
+                  split = pkgs.lib.strings.splitString "/" setInfo.path;
+                  version = builtins.elemAt split 0;
+                  fileName = builtins.elemAt split 1;
+                in
+                assert version == packageVersion;
+                {
+                  name = fileName;
+                  path = derivation {
+                    name = "${fileName}-${version}";
+                    builder = "${pkgs.bash}/bin/bash";
+                    PATH = "${pkgs.wget}/bin";
+                    args = [ (builtins.toFile "builder.sh" ''
+                      wget https://cdn.malie.io/file/malie-io/tcgl/export/${setInfo.path} -O $out
+                    '') ];
+                    inherit system;
+                    outputHash = setInfo.hash;
+                    outputHashAlgo = "md5";
+                  };
+                }
+              )
+            ) index
+          ));
         in
         {
           _module.args.pkgs = import nixpkgs {
             inherit system;
-            overlays = with inputs; [
+            overlays = [
               rust-overlay.overlays.default
             ];
           };
 
           packages = {
+            inherit sources;
             rust-nightly = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
-            default = crane.nightly.buildPackage {
+            default = crane.lib.buildPackage {
               src = ./.;
+              doCheck = false;
               cargoBuildCommand = "cargo build --release";
             };
-
-            fetch-sources = pkgs.writeShellApplication {
-              name = "fetch-sources";
-              runtimeInputs = [ pkgs.wget ];
-              text = ''
-                cd sources
-                find . -type f -delete
-
-                curl https://cdn.malie.io/file/malie-io/tcgl/export/index.json \
-                | jq -r '. | to_entries | map(.value | to_entries | map(.value)) | flatten | .[].path' \
-                | while IFS= read -r line
-                  do
-                    wget "${export_base_url}/$line";
-                  done
-              '';
+          };
+          checks = {
+            default = crane.lib.cargoTest {
+              strictDeps = true;
+              src = ./.;
+              cargoArtifacts = crane.lib.buildDepsOnly {
+                strictDeps = true;
+                src = ./.;
+              };
+              SOURCES_DIR="${sources}";
             };
           };
           devShells = {
