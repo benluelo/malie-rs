@@ -1,4 +1,7 @@
-use std::{borrow::Cow, fmt::Display, num::NonZeroU16};
+#![warn(clippy::pedantic)]
+#![allow(clippy::enum_variant_names)]
+
+use std::{borrow::Cow, num::NonZeroU16};
 
 use serde::{Deserialize, Serialize};
 use time::PrimitiveDateTime;
@@ -315,6 +318,8 @@ pub enum FoilType {
     SvUltra,
     SvUltraScodix,
     AceFoil,
+    Rainbow,
+    CrackedIce,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -647,26 +652,17 @@ enum EnergyType {
 #[serde(deny_unknown_fields, rename_all = "SCREAMING_SNAKE_CASE")]
 enum AttackCost {
     Free,
-
-    // TODO: Custom serde implementation to flatten EnergyType into this enum
-    Grass,
-    Fire,
-    Water,
-    Lightning,
-    Psychic,
-    Fighting,
-    Darkness,
-    Metal,
-    Dragon,
-    Colorless,
+    #[serde(untagged)]
+    Energy(EnergyType),
 }
 
-pub mod u32_hex {
-    use serde::{de, Deserialize};
+pub(crate) mod u32_hex {
+    use serde::{Deserialize, de};
 
     const HEX_ENCODING_PREFIX: &str = "0x";
 
-    pub fn serialize<S>(data: &u32, serializer: S) -> Result<S::Ok, S::Error>
+    #[expect(clippy::trivially_copy_pass_by_ref, reason = "required by serde api")]
+    pub(crate) fn serialize<S>(data: &u32, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
     {
@@ -676,7 +672,7 @@ pub mod u32_hex {
         ))
     }
 
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<u32, D::Error>
+    pub(crate) fn deserialize<'de, D>(deserializer: D) -> Result<u32, D::Error>
     where
         D: serde::Deserializer<'de>,
     {

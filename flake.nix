@@ -10,7 +10,6 @@
     };
     crane = {
       url = "github:ipetkov/crane";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
   outputs = inputs@{ self, nixpkgs, rust-overlay, flake-parts, ... }:
@@ -55,7 +54,7 @@
                 find . -type f -delete
 
                 curl https://cdn.malie.io/file/malie-io/tcgl/export/index.json \
-                | jq -r '. | to_entries | map(.value | to_entries | map(.value)) | flatten | .[]' \
+                | jq -r '. | to_entries | map(.value | to_entries | map(.value)) | flatten | .[].path' \
                 | while IFS= read -r line
                   do
                     wget "${export_base_url}/$line";
@@ -69,7 +68,8 @@
                 ++ (with pkgs; [
                 jq
                 moreutils
-                rnix-lsp
+                nixd
+                cargo-edit
               ]);
             };
           };
