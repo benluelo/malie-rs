@@ -1,17 +1,18 @@
+#![cfg_attr(not(test), no_std)]
 #![warn(clippy::pedantic)]
 #![allow(clippy::enum_variant_names)]
 
-use std::{borrow::Cow, num::NonZeroU16};
+extern crate alloc;
+
+use alloc::{borrow::Cow, vec::Vec};
+use core::num::{NonZeroU8, NonZeroU16};
 
 use serde::{Deserialize, Serialize};
 use time::PrimitiveDateTime;
 use url::Url;
 
-time::serde::format_description!(
-    reldate,
-    PrimitiveDateTime,
-    "[year]-[month]-[day] [hour]:[minute]:[second]+00:00"
-);
+/// Inlined version of <https://docs.rs/time/latest/time/serde/macro.format_description.html> to allow for this crate to be `#![no_std]`.
+mod reldate;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(
@@ -211,7 +212,7 @@ pub struct Stadium<'a> {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(tag = "subtype")]
+#[serde(deny_unknown_fields, tag = "subtype")]
 pub enum Energy<'a> {
     #[serde(rename = "BASIC")]
     Basic(#[serde(borrow)] BasicEnergy<'a>),
@@ -229,10 +230,6 @@ pub struct BasicEnergy<'a> {
     foil: Option<Foil>,
     size: CardSize,
     back: CardBack,
-    // REVIEW: Do basic energies every have artist(s)?
-    // artists: Artists,
-    // REVIEW: Do basic energies every have a regulation mark?
-    // regulation_mark: RegulationMark,
     #[serde(borrow)]
     set_icon: Cow<'a, str>,
     #[serde(borrow)]
@@ -259,8 +256,6 @@ pub struct SpecialEnergy<'a> {
     foil: Option<Foil>,
     size: CardSize,
     back: CardBack,
-    // REVIEW: Do basic energies every have artist(s)?
-    // artists: Artists,
     regulation_mark: RegulationMark,
     #[serde(borrow)]
     set_icon: Cow<'a, str>,
@@ -279,7 +274,6 @@ pub struct SpecialEnergy<'a> {
     #[serde(borrow)]
     ext: Ext<'a>,
     images: Images,
-    // types: Vec<EnergyType>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -453,7 +447,7 @@ pub enum Stage {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Weakness {
-    amount: u8,
+    amount: NonZeroU8,
     operator: WeaknessOperator,
     types: Vec<EnergyType>,
 }
@@ -567,8 +561,7 @@ pub enum DamageSuffix {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-#[serde(tag = "kind", rename_all = "SCREAMING_SNAKE_CASE")]
+#[serde(deny_unknown_fields, tag = "kind", rename_all = "SCREAMING_SNAKE_CASE")]
 enum Text<'a> {
     Attack(#[serde(borrow)] Attack<'a>),
     Ability(#[serde(borrow)] Ability<'a>),
@@ -657,6 +650,8 @@ enum AttackCost {
 }
 
 pub(crate) mod u32_hex {
+    use alloc::string::String;
+
     use serde::{Deserialize, de};
 
     const HEX_ENCODING_PREFIX: &str = "0x";
