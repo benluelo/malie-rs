@@ -289,6 +289,8 @@ pub enum Lang {
     DeDe,
     #[serde(rename = "es-ES")]
     EsEs,
+    #[serde(rename = "es-419")]
+    Es419,
     #[serde(rename = "pt-BR")]
     PtBr,
 }
@@ -358,6 +360,7 @@ pub enum RegulationMark {
     F,
     G,
     H,
+    I,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -434,6 +437,7 @@ pub enum CardTag {
     Ancient,
     Shiny,
     AceSpec,
+    TrainersPokemon,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
