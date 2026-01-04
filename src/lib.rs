@@ -31,6 +31,8 @@ enum Card<'a> {
 struct Pokemon<'a> {
     #[serde(borrow)]
     name: Cow<'a, str>,
+    #[serde(borrow, skip_serializing_if = "Option::is_none")]
+    subtitle: Option<Cow<'a, str>>,
     lang: Lang,
     #[serde(skip_serializing_if = "Option::is_none")]
     foil: Option<Foil>,
@@ -316,6 +318,8 @@ pub enum FoilType {
     AceFoil,
     Rainbow,
     CrackedIce,
+    UltraGoldRainbow,
+    Tinsel,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -325,6 +329,9 @@ pub enum FoilMask {
     Reverse,
     Holo,
     Etched,
+    ColdFoilEtched,
+    CastAndCure,
+    ReverseLaminate,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -397,6 +404,8 @@ pub enum RarityDesignation {
     ShinyUltraRare,
     Promo,
     AceSpecRare,
+    MegaHyperRare,
+    BlackWhiteRare,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -414,6 +423,8 @@ pub enum RarityIcon {
     TwoShinyStars,
     BlackStarPromo,
     PinkStar,
+    FourPointStar,
+    BlackWhiteStars,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -438,6 +449,7 @@ pub enum CardTag {
     Shiny,
     AceSpec,
     TrainersPokemon,
+    MegaEvolution,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
