@@ -20,7 +20,7 @@ mod reldate;
     tag = "card_type",
     rename_all = "SCREAMING_SNAKE_CASE"
 )]
-enum Card<'a> {
+pub enum Card<'a> {
     Pokemon(#[serde(borrow)] Pokemon<'a>),
     Trainer(#[serde(borrow)] Trainer<'a>),
     Energy(#[serde(borrow)] Energy<'a>),
@@ -28,7 +28,7 @@ enum Card<'a> {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Pokemon<'a> {
+pub struct Pokemon<'a> {
     #[serde(borrow)]
     name: Cow<'a, str>,
     #[serde(borrow, skip_serializing_if = "Option::is_none")]
@@ -372,7 +372,7 @@ pub enum RegulationMark {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct CollectorNumber<'a> {
+pub struct CollectorNumber<'a> {
     #[serde(borrow)]
     full: Cow<'a, str>,
     #[serde(borrow)]
@@ -384,7 +384,7 @@ struct CollectorNumber<'a> {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Rarity {
+pub struct Rarity {
     designation: RarityDesignation,
     icon: RarityIcon,
 }
@@ -462,7 +462,7 @@ pub enum Stage {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Weakness {
+pub struct Weakness {
     amount: NonZeroU8,
     operator: WeaknessOperator,
     types: Vec<EnergyType>,
@@ -479,7 +479,7 @@ pub enum WeaknessOperator {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Resistance {
+pub struct Resistance {
     amount: u8,
     operator: ResistanceOperator,
     types: Vec<EnergyType>,
@@ -501,7 +501,7 @@ pub struct Ext<'a> {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Tcgl<'a> {
+pub struct Tcgl<'a> {
     #[serde(rename = "archetypeID", with = "crate::u32_hex")]
     archetype_id: u32,
     #[serde(rename = "cardID")]
@@ -518,13 +518,13 @@ struct Tcgl<'a> {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Images {
+pub struct Images {
     tcgl: TcglImages,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct TcglImages {
+pub struct TcglImages {
     jpg: ImageJpg,
     png: ImagePng,
     tex: ImageTex,
@@ -532,23 +532,13 @@ struct TcglImages {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct ImageJpg {
+pub struct ImageJpg {
     front: Url,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct ImagePng {
-    front: Url,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    foil: Option<Url>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    etch: Option<Url>,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-struct ImageTex {
+pub struct ImagePng {
     front: Url,
     #[serde(skip_serializing_if = "Option::is_none")]
     foil: Option<Url>,
@@ -558,7 +548,17 @@ struct ImageTex {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Damage {
+pub struct ImageTex {
+    front: Url,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    foil: Option<Url>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    etch: Option<Url>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Damage {
     // REVIEW: Multiple of 10, nonzero?
     amount: u16,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -578,7 +578,7 @@ pub enum DamageSuffix {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, tag = "kind", rename_all = "SCREAMING_SNAKE_CASE")]
-enum Text<'a> {
+pub enum Text<'a> {
     Attack(#[serde(borrow)] Attack<'a>),
     Ability(#[serde(borrow)] Ability<'a>),
     RuleBox(#[serde(borrow)] RuleBox<'a>),
@@ -589,7 +589,7 @@ enum Text<'a> {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Attack<'a> {
+pub struct Attack<'a> {
     #[serde(borrow)]
     name: Cow<'a, str>,
     #[serde(borrow, skip_serializing_if = "Option::is_none")]
@@ -601,7 +601,7 @@ struct Attack<'a> {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Ability<'a> {
+pub struct Ability<'a> {
     #[serde(borrow)]
     name: Cow<'a, str>,
     #[serde(borrow)]
@@ -610,7 +610,7 @@ struct Ability<'a> {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct RuleBox<'a> {
+pub struct RuleBox<'a> {
     #[serde(borrow)]
     name: Cow<'a, str>,
     #[serde(borrow)]
@@ -619,7 +619,7 @@ struct RuleBox<'a> {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Effect<'a> {
+pub struct Effect<'a> {
     #[serde(borrow)]
     name: Cow<'a, str>,
     #[serde(borrow)]
@@ -628,7 +628,7 @@ struct Effect<'a> {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct TextBox<'a> {
+pub struct TextBox<'a> {
     #[serde(borrow, skip_serializing_if = "Option::is_none")]
     name: Option<Cow<'a, str>>,
     #[serde(borrow)]
@@ -637,14 +637,14 @@ struct TextBox<'a> {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-struct Reminder<'a> {
+pub struct Reminder<'a> {
     #[serde(borrow)]
     text: Cow<'a, str>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, rename_all = "SCREAMING_SNAKE_CASE")]
-enum EnergyType {
+pub enum EnergyType {
     Grass,
     Fire,
     Water,
@@ -659,7 +659,7 @@ enum EnergyType {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, rename_all = "SCREAMING_SNAKE_CASE")]
-enum AttackCost {
+pub enum AttackCost {
     Free,
     #[serde(untagged)]
     Energy(EnergyType),

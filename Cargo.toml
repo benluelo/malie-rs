@@ -1,13 +1,13 @@
 [package]
 name = "malie"
-version = "0.0.2+v0.1.9.12"
+version = "0.0.3+v0.1.9.12"
 edition = "2024"
 
 [dependencies]
 hex = { version = "0.4.3", default-features = false, features = ["serde", "alloc"] }
-serde = { version = "1.0.219", default-features = false, features = ["derive"] }
-time = { version = "0.3.39", default-features = false, features = ["serde", "formatting", "parsing", "macros", "alloc"] }
-url = { version = "2.5.4", default-features = false, features = ["serde"] }
+serde = { version = "1.0.228", default-features = false, features = ["derive"] }
+time = { version = "0.3.44", default-features = false, features = ["serde", "formatting", "parsing", "macros", "alloc"] }
+url = { version = "2.5.7", default-features = false, features = ["serde"] }
 
 [dev-dependencies]
-serde_json = { version = "1.0.140" }
+serde_json = { version = "1.0.148" }
