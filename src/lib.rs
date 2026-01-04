@@ -72,8 +72,11 @@ pub struct Pokemon<'a> {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields, rename_all = "SCREAMING_SNAKE_CASE")]
-#[serde(tag = "subtype")]
+#[serde(
+    deny_unknown_fields,
+    tag = "subtype",
+    rename_all = "SCREAMING_SNAKE_CASE"
+)]
 pub enum Trainer<'a> {
     Item(#[serde(borrow)] Item<'a>),
     Supporter(#[serde(borrow)] Supporter<'a>),
@@ -214,11 +217,13 @@ pub struct Stadium<'a> {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields, tag = "subtype")]
+#[serde(
+    deny_unknown_fields,
+    tag = "subtype",
+    rename_all = "SCREAMING_SNAKE_CASE"
+)]
 pub enum Energy<'a> {
-    #[serde(rename = "BASIC")]
     Basic(#[serde(borrow)] BasicEnergy<'a>),
-    #[serde(rename = "SPECIAL")]
     Special(#[serde(borrow)] SpecialEnergy<'a>),
 }
 
@@ -504,13 +509,11 @@ pub struct Ext<'a> {
 pub struct Tcgl<'a> {
     #[serde(rename = "archetypeID", with = "crate::u32_hex")]
     archetype_id: u32,
-    #[serde(rename = "cardID")]
-    #[serde(borrow)]
+    #[serde(borrow, rename = "cardID")]
     card_id: Cow<'a, str>,
     #[serde(borrow)]
     key: Cow<'a, str>,
-    #[serde(rename = "longFormID")]
-    #[serde(borrow)]
+    #[serde(borrow, rename = "longFormID")]
     long_form_id: Cow<'a, str>,
     #[serde(with = "reldate")]
     reldate: PrimitiveDateTime,
