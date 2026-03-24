@@ -373,6 +373,7 @@ pub enum RegulationMark {
     G,
     H,
     I,
+    J,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -411,6 +412,7 @@ pub enum RarityDesignation {
     AceSpecRare,
     MegaHyperRare,
     BlackWhiteRare,
+    MegaAttackRare,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -430,6 +432,7 @@ pub enum RarityIcon {
     PinkStar,
     FourPointStar,
     BlackWhiteStars,
+    PinkGreenStars,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

@@ -36,7 +36,7 @@
             lib = (inputs.crane.mkLib pkgs).overrideToolchain (_: self'.packages.rust-nightly);
           };
 
-          packageVersion = builtins.elemAt (pkgs.lib.strings.splitString "+" (builtins.fromTOML (builtins.readFile ./Cargo.toml)).package.version) 1;
+          packageVersion = builtins.elemAt (pkgs.lib.strings.splitString "+" (fromTOML (builtins.readFile ./Cargo.toml)).package.version) 1;
 
           index = builtins.fromJSON (builtins.readFile inputs.malie.outPath);
 
@@ -45,9 +45,9 @@
               lang: pkgs.lib.mapAttrsToList (
                 setName: setInfo:
                 let
-                  split = pkgs.lib.strings.splitString "/" setInfo.path;
-                  version = builtins.elemAt split 0;
-                  fileName = builtins.elemAt split 1;
+                  splitPath = pkgs.lib.strings.splitString "/" setInfo.path;
+                  version = builtins.elemAt splitPath 0;
+                  fileName = builtins.elemAt splitPath 1;
                 in
                 assert version == packageVersion;
                 {
